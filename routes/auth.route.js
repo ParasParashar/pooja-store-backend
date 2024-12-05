@@ -1,9 +1,9 @@
 import { Router } from "express";
 import passport from "passport";
 import { getSellerDetails, logout } from "../controllers/auth.controller.js";
-
+import dotenv from "dotenv";
 const router = Router();
-
+dotenv.config();
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -11,7 +11,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    successRedirect: "http://localhost:3000/",
+    successRedirect: process.env.FRONTEND_url,
     failureRedirect: "/",
   })
 );

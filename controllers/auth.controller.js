@@ -4,7 +4,7 @@ export const getSellerDetails = async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const userId = req.user.id;
-      const user = await prisma.seller.findUnique({ where: { id: userId } });
+      const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -12,6 +12,7 @@ export const getSellerDetails = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        isAdmin: user.isAdmin,
       });
     } catch (error) {
       console.log("Error in getting user", error.message);

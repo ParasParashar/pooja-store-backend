@@ -1,5 +1,5 @@
 import prisma from "../prisma/prisma.js";
-import cloudinary from "../config/cloudinary.js";
+
 // Utility function to generate a slug
 const generateSlug = (name) => {
   return `${name
@@ -17,32 +17,32 @@ export const createProduct = async (req, res) => {
       price,
       category,
       discountPercent,
-      isFeatured,
       stock,
       imageUrl,
     } = req.body;
+
     // Validate required fields
-    if (!name || !price || !category) {
+    if (!name || !price || !category || !stock) {
       return res.status(400).json({
         success: false,
-        message: "Name, price, and categoryId are required fields.",
+        message: "Name, price, category, and stock are required fields.",
       });
     }
 
-    // Create a unique slug for the product
+    // Generate slug for the product
     const slug = generateSlug(name);
 
-    // create a product
     const product = await prisma.product.create({
       data: {
         name,
-        description: description || null,
+        description: description,
         price: parseFloat(price),
+        discountPercent: discountPercent
+          ? parseFloat(discountPercent)
+          : undefined,
+        stock: parseInt(stock, 10),
         category,
         slug,
-        discountPercent: parseFloat(discountPercent),
-        sellerId: req.user.id,
-        stock: stock,
         imageUrl: imageUrl,
       },
     });
@@ -62,35 +62,27 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// get all products
-export const getSellerAllProducts = async (req, res) => {
+// Get All Products
+export const getAllProducts = async (req, res) => {
   try {
-    const { id: sellerId } = req.user;
-    // Validate seller ID
-    if (!sellerId) {
-      return res.status(400).json({
-        success: false,
-        message: "You are not authorized",
-      });
-    }
-
-    // Fetch all products for the seller with basic details
     const products = await prisma.product.findMany({
-      where: {},
       select: {
         id: true,
         name: true,
         price: true,
+        stock: true,
         isPublished: true,
         discountPercent: true,
-        stock: true,
+        category: true,
         slug: true,
+        imageUrl: true,
       },
     });
+
     if (products.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No products found for the seller.",
+        message: "No products found.",
       });
     }
 
@@ -108,24 +100,16 @@ export const getSellerAllProducts = async (req, res) => {
     });
   }
 };
-// get specific product
+
+// Get Specific Product
 export const getSpecificProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    // Validate product ID
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Product ID is required.",
-      });
-    }
 
-    // Fetch the product with details
     const product = await prisma.product.findUnique({
-      where: { id, isPublished: true },
+      where: { id },
     });
 
-    // Check if the product exists
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -148,7 +132,7 @@ export const getSpecificProduct = async (req, res) => {
   }
 };
 
-// edit product
+// Update Product
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const {
@@ -161,29 +145,27 @@ export const updateProduct = async (req, res) => {
     isPublished,
     discountPercent,
   } = req.body;
+
   try {
-    if (!name || !price) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, price, and category are required fields.",
-      });
-    }
     const existingProduct = await prisma.product.findUnique({
       where: { id },
     });
+
     if (!existingProduct) {
       return res.status(404).json({
         success: false,
         message: "Product not found.",
       });
     }
-    const slug = generateSlug(name);
+
+    const slug = name ? generateSlug(name) : undefined;
+
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
         ...(name && { name }),
         ...(slug && { slug }),
-        ...(stock && { stock }),
+        ...(stock && { stock: parseInt(stock, 10) }),
         ...(description && { description }),
         ...(imageUrl && { imageUrl }),
         ...(price !== undefined && { price: parseFloat(price) }),
@@ -204,55 +186,19 @@ export const updateProduct = async (req, res) => {
     console.error("Error updating product:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message: "An error occurred while updating the product.",
+      error: error.message,
     });
   }
 };
 
-export const publishUnpublishProduct = async (req, res) => {
-  const { id } = req.params;
-  try {
-    // Check if the product exists
-    const product = await prisma.product.findUnique({
-      where: { id: id },
-    });
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found.",
-      });
-    }
-
-    await prisma.product.update({
-      where: {
-        id: id,
-      },
-      data: {
-        isPublished: product.isPublished ? false : true,
-      },
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Product is available to sell",
-    });
-  } catch (error) {
-    console.error("Error publishing product", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to publish Product Please try again later.",
-    });
-  }
-};
-
-// delete product permanently and delete all images uploaded in the cloudinary
+// Delete Product Permanently
 export const deleteProductPermanently = async (req, res) => {
   try {
     const { id } = req.params;
-    // Check if the product exists
+
     const product = await prisma.product.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!product) {
@@ -261,38 +207,27 @@ export const deleteProductPermanently = async (req, res) => {
         message: "Product not found.",
       });
     }
-    // delete product uploaded on the cloudinary
-    for (const variants of product.variants) {
-      for (const image of variants.images) {
-        await cloudinary.uploader.destroy(image.split("/").pop().split(".")[0]);
-      }
-      await prisma.attribute.deleteMany({
-        where: {
-          variantId: variants.id,
-        },
-      });
-    }
-    await prisma.variant.deleteMany({
-      where: {
-        productId: id,
-      },
+
+    // Delete associated order items
+    await prisma.orderItem.deleteMany({
+      where: { productId: id },
     });
+
+    // Delete product
     await prisma.product.delete({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
 
     return res.status(200).json({
       success: true,
-      message: "Product deleted permanently successfully.",
+      message: "Product deleted permanently.",
     });
   } catch (error) {
-    console.error("Error publishing product", error.message);
+    console.error("Error deleting product:", error);
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to delete the  Product permanently ,Please try again later.",
+      message: "An error occurred while deleting the product.",
+      error: error.message,
     });
   }
 };
