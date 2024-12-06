@@ -15,11 +15,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(express.json({ limit: "50mb" })); // 50 MB limit for JSON requests
-// cors
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true })); // to handle the form data
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173"],
     credentials: true,
   })
 );
