@@ -233,3 +233,42 @@ export const deleteProductPermanently = async (req, res) => {
     });
   }
 };
+
+// publish and unpublish products
+
+export const publishUnpublishProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Check if the product exists
+    const product = await prisma.product.findUnique({
+      where: { id: id },
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found.",
+      });
+    }
+
+    await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data: {
+        isPublished: product.isPublished ? false : true,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Product is available to sell",
+    });
+  } catch (error) {
+    console.error("Error publishing product", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to publish Product Please try again later.",
+    });
+  }
+};

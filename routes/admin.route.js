@@ -5,7 +5,12 @@ import {
   updateProduct,
   getAllProducts,
   deleteProductPermanently,
+  publishUnpublishProduct,
 } from "../controllers/product.controller.js";
+import {
+  getAllOrders,
+  updateOrderDeliveryStatus,
+} from "../controllers/order.controller.js";
 
 const router = Router();
 
@@ -14,7 +19,11 @@ router.get("/products", getAllProducts);
 router.get("/product/:id", getSpecificProduct);
 router.post("/product/create", createProduct);
 router.post("/product/update/:id", updateProduct);
-// router.put("/product/update/publish/:id", publishUnpublishProduct);
+router.put("/product/publish/:id", publishUnpublishProduct);
 router.delete("/product/delete/:id", deleteProductPermanently);
+
+// orders routes
+router.get("/orders", getAllOrders);
+router.get("/order/update/:id", updateOrderDeliveryStatus);
 
 export default router;
