@@ -8,10 +8,16 @@ import storeRoutes from "./routes/store.route.js";
 import passport from "./config/passport.js";
 import cors from "cors";
 import MongoStore from "connect-mongo";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { isSeller, isAuthenticated } from "./middlewares/authenticated.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -42,6 +48,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// sending staitc files
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
     res.send("<a href='/auth/logout'>Logout</a>" + req.user.name);
