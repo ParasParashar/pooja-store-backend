@@ -32,13 +32,13 @@ router.post("/uploadimage", upload.single("image"), async (req, res) => {
       });
     }
 
-    console.log(req.file, "data of the uploaded things");
-    const imageUrl = path.join("/uploads", req.file.filename);
+    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const imageUrl = `${backendUrl}/${req.file.path.replace(/\\/g, "/")}`;
 
     return res.status(200).json({
       success: true,
       message: "Image uploaded successfully",
-      imageUrl,
+      data: imageUrl,
     });
   } catch (error) {
     console.error("Error in uploading image: " + error.message);
