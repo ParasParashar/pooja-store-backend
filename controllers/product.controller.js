@@ -208,7 +208,9 @@ export const deleteProductPermanently = async (req, res) => {
       });
     }
 
-    // Delete associated order items
+    // TODO: delete image of the product also
+
+    // delete associated order items
     await prisma.orderItem.deleteMany({
       where: { productId: id },
     });

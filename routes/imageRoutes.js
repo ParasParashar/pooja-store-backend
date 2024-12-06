@@ -77,18 +77,3 @@ router.post("/deleteimage", async (req, res) => {
 });
 
 export default router;
-
-// frntend
-
-// const uploadImage = async (file) => {
-//   const formData = new FormData();
-//   formData.append("image", file);
-
-//   const response = await fetch("/uploadimage", {
-//     method: "POST",
-//     body: formData,
-//   });
-
-//   const result = await response.json();
-//   console.log(result);
-// };

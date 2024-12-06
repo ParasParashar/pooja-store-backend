@@ -63,7 +63,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 // admin  routes
 app.use("/api/admin", isAuthenticated, adminRoutes);
-app.use("/api/image", imagesRoutes);
+app.use("/api/image", isAuthenticated, imagesRoutes);
 // store routes
 app.use("/api/store", storeRoutes);
 

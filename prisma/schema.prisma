@@ -25,7 +25,7 @@ model Product {
 
 model User {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  googleId    String?  @unique // Add this field
+  googleId    String?  @unique
   name        String
   email       String   @unique
   isAdmin     Boolean  @default(false)
@@ -45,11 +45,17 @@ model Order {
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
 
-  status      OrderStatus @default(PENDING)
-  totalAmount Float
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  paymentMethod     PaymentMethod   @default(COD)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  status            OrderStatus     @default(PENDING)
+  totalAmount       Float
+  orderItems        OrderItem[]
+  deliveryStatus    DeliveryStatus  @default(PENDING)
+  shippingAddress   ShippingAddress @relation(fields: [shippingAddressId], references: [id])
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  shippingAddressId String          @db.ObjectId
 }
 
 model OrderItem {
@@ -64,9 +70,35 @@ model OrderItem {
   updatedAt DateTime @updatedAt
 }
 
+model ShippingAddress {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId     String   @db.ObjectId
+  street      String
+  city        String
+  state       String
+  postalCode  String
+  country     String
+  phonenumber String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Order       Order[]
+}
+
+enum PaymentMethod {
+  COD
+  ONLINE
+}
+
 enum OrderStatus {
   PENDING
   PROCESSING
   COMPLETED
   CANCELLED
+}
+
+enum DeliveryStatus {
+  PENDING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
 }
