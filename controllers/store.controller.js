@@ -1,7 +1,5 @@
 import prisma from "../prisma/prisma.js";
 
-import prisma from "../prisma/prisma.js";
-
 export const getProductDetails = async (req, res) => {
   try {
     const { slug } = req.params;
