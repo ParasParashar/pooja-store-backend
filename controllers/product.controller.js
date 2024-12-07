@@ -19,8 +19,8 @@ export const createProduct = async (req, res) => {
       discountPercent,
       stock,
       imageUrl,
+      isPublished = true,
     } = req.body;
-
     // Validate required fields
     if (!name || !price || !category || !stock) {
       return res.status(400).json({
@@ -44,6 +44,7 @@ export const createProduct = async (req, res) => {
         category,
         slug,
         imageUrl: imageUrl,
+        isPublished,
       },
     });
 
