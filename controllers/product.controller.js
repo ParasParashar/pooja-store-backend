@@ -45,6 +45,8 @@ export const createProduct = async (req, res) => {
         slug,
         imageUrl: imageUrl,
         isPublished,
+        discountPrice:
+          discountPercent > 0 ? price - price * (discountPercent / 100) : price,
       },
     });
 

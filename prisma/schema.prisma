@@ -16,6 +16,7 @@ model Product {
   stock           Int
   category        String
   slug            String
+  discountPrice   Float
   imageUrl        String      @default("")
   isPublished     Boolean     @default(false)
   createdAt       DateTime    @default(now())
