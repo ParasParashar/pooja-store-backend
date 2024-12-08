@@ -37,9 +37,7 @@ export const createProduct = async (req, res) => {
         name,
         description: description,
         price: parseFloat(price),
-        discountPercent: discountPercent
-          ? parseFloat(discountPercent)
-          : undefined,
+        discountPercent: discountPercent ? parseFloat(discountPercent) : 0,
         stock: parseInt(stock, 10),
         category,
         slug,
@@ -160,6 +158,9 @@ export const updateProduct = async (req, res) => {
 
     const slug = name ? generateSlug(name) : undefined;
 
+    const discountPrice =
+      discountPercent > 0 ? price - price * (discountPercent / 100) : price;
+
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
@@ -174,6 +175,7 @@ export const updateProduct = async (req, res) => {
         }),
         ...(category && { category }),
         ...(typeof isPublished === "boolean" && { isPublished }),
+        ...(discountPrice && { discountPrice: parseFloat(discountPrice) }),
       },
     });
 
