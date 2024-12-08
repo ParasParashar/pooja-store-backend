@@ -81,7 +81,6 @@ export const getAllProducts = async (req, res) => {
         imageUrl: true,
       },
     });
-
     if (products.length === 0) {
       return res.status(404).json({
         success: false,
@@ -108,11 +107,9 @@ export const getAllProducts = async (req, res) => {
 export const getSpecificProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
     const product = await prisma.product.findUnique({
-      where: { id },
+      where: { slug: id },
     });
-
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -151,7 +148,7 @@ export const updateProduct = async (req, res) => {
 
   try {
     const existingProduct = await prisma.product.findUnique({
-      where: { slug: id },
+      where: { id: id },
     });
 
     if (!existingProduct) {

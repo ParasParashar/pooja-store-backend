@@ -15,7 +15,7 @@ model Product {
   discountPercent Float       @default(0)
   stock           Int
   category        String
-  slug            String
+  slug            String      @unique
   discountPrice   Float
   imageUrl        String      @default("")
   isPublished     Boolean     @default(false)
