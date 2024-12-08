@@ -151,7 +151,7 @@ export const updateProduct = async (req, res) => {
 
   try {
     const existingProduct = await prisma.product.findUnique({
-      where: { id },
+      where: { slug: id },
     });
 
     if (!existingProduct) {
