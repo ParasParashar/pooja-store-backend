@@ -31,7 +31,8 @@ export const createProduct = async (req, res) => {
 
     // Generate slug for the product
     const slug = generateSlug(name);
-
+    const dp =
+      discountPercent > 0 ? price - price * (discountPercent / 100) : 0;
     const product = await prisma.product.create({
       data: {
         name,
@@ -43,8 +44,7 @@ export const createProduct = async (req, res) => {
         slug,
         imageUrl: imageUrl,
         isPublished,
-        discountPrice:
-          discountPercent > 0 ? price - price * (discountPercent / 100) : price,
+        discountPrice: parseFloat(dp),
       },
     });
 
@@ -156,10 +156,10 @@ export const updateProduct = async (req, res) => {
       });
     }
 
-    const slug = name ? generateSlug(name) : undefined;
+    const slug = name ? generateSlug(name) : existingProduct.slug;
 
     const discountPrice =
-      discountPercent > 0 ? price - price * (discountPercent / 100) : price;
+      discountPercent > 0 ? price - price * (discountPercent / 100) : 0;
 
     const updatedProduct = await prisma.product.update({
       where: { id },
