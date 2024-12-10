@@ -2,9 +2,11 @@ import { Router } from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-
+import { fileURLToPath } from "url";
+import prisma from "../prisma/prisma.js";
 const router = Router();
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -52,11 +54,35 @@ router.post("/uploadimage", upload.single("image"), async (req, res) => {
 // Route to delete an image
 router.post("/deleteimage", async (req, res) => {
   try {
-    const { imageToRemove } = req.body;
-    const imagePath = path.join("./uploads", imageToRemove);
+    const { imageToRemove, productId } = req.body;
+    if (!imageToRemove) {
+      return res.status(400).json({
+        success: false,
+        message: "No image path provided",
+      });
+    }
 
+    // Ensure the relative path is sanitized to avoid directory traversal
+    const relativePath = imageToRemove.replace(
+      `${req.protocol}://${req.get("host")}`,
+      ""
+    );
+
+    const sanitizedPath = path
+      .normalize(relativePath)
+      .replace(/^(\.\.(\/|\\|$))+/, "");
+
+    const imagePath = path.join(__dirname, "..", sanitizedPath);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
+      await prisma.product.update({
+        where: {
+          id: productId,
+        },
+        data: {
+          imageUrl: "",
+        },
+      });
       return res.status(200).json({
         success: true,
         message: "Image deleted successfully",

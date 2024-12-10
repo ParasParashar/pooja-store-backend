@@ -1,12 +1,11 @@
 import prisma from "../prisma/prisma.js";
-
-// Utility function to generate a slug
-const generateSlug = (name) => {
-  return `${name
-    .toLowerCase()
-    .replace(/ /g, "-")
-    .replace(/[^a-z0-9-]/g, "")}-${Date.now()}`;
-};
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { generateSlug } from "../utils/functions.js";
+// use for deleting the image;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create Product Controller
 export const createProduct = async (req, res) => {
@@ -146,9 +145,8 @@ export const updateProduct = async (req, res) => {
 
   try {
     const existingProduct = await prisma.product.findUnique({
-      where: { id: id },
+      where: { slug: id },
     });
-
     if (!existingProduct) {
       return res.status(404).json({
         success: false,
@@ -162,7 +160,7 @@ export const updateProduct = async (req, res) => {
       discountPercent > 0 ? price - price * (discountPercent / 100) : 0;
 
     const updatedProduct = await prisma.product.update({
-      where: { id },
+      where: { id: existingProduct.id },
       data: {
         ...(name && { name }),
         ...(slug && { slug }),
@@ -178,7 +176,6 @@ export const updateProduct = async (req, res) => {
         ...(discountPrice && { discountPrice: parseFloat(discountPrice) }),
       },
     });
-
     return res.status(200).json({
       success: true,
       message: "Product updated successfully.",
@@ -211,7 +208,17 @@ export const deleteProductPermanently = async (req, res) => {
     }
 
     // TODO: delete image of the product also
+    const relativePath = product.imageUrl.replace(
+      `${req.protocol}://${req.get("host")}`,
+      ""
+    );
 
+    const sanitizedPath = path
+      .normalize(relativePath)
+      .replace(/^(\.\.(\/|\\|$))+/, "");
+
+    const imagePath = path.join(__dirname, "..", sanitizedPath);
+    fs.unlinkSync(imagePath);
     // delete associated order items
     await prisma.orderItem.deleteMany({
       where: { productId: id },
