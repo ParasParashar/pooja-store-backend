@@ -76,6 +76,7 @@ export const getAllProducts = async (req, res) => {
         category: true,
         slug: true,
         imageUrl: true,
+        description: true,
       },
     });
     if (products.length === 0) {
