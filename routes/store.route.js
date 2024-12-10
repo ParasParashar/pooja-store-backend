@@ -14,7 +14,7 @@ import { createOrder } from "../controllers/payment.controller.js";
 const router = Router();
 
 router.get("/products", getProducts);
-router.get("/product/:id", getProductDetails);
+router.get("/products/:id", getProductDetails);
 
 // cart
 router.post("/products/cart", getCartData);

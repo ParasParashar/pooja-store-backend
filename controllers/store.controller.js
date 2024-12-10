@@ -2,7 +2,7 @@ import prisma from "../prisma/prisma.js";
 // display all products of the user
 export const getProductDetails = async (req, res) => {
   try {
-    const { slug } = req.params;
+    const { id: slug } = req.params;
     const product = await prisma.product.findUnique({
       where: { slug },
       select: {

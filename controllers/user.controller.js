@@ -94,10 +94,11 @@ export const getUserData = async (req, res) => {
 export const getCartData = async (req, res) => {
   try {
     const productIds = req.body;
-
     const products = await prisma.product.findMany({
       where: {
-        id: productIds,
+        id: {
+          in: productIds,
+        },
       },
     });
     if (!products || products.length === 0) {
@@ -106,9 +107,11 @@ export const getCartData = async (req, res) => {
         .json({ message: "Products not found", success: false });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Products Data get successfully.", success: false });
+    return res.status(200).json({
+      message: "Products Data get successfully.",
+      success: true,
+      data: products,
+    });
   } catch (error) {
     console.error("Error getting cart data", error);
     return res
