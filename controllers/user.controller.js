@@ -5,7 +5,6 @@ export const upsertUserAddress = async (req, res) => {
     const { id } = req.params;
     const { street, city, name, state, postalCode, country, phonenumber } =
       req.body;
-
     if (!street || !city || !state || !postalCode || !country || !phonenumber) {
       return res.status(400).json({
         success: false,

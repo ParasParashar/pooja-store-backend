@@ -13,6 +13,12 @@ export const getSellerDetails = async (req, res) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        street: user.street,
+        city: user.city,
+        postalCode: user.postalCode,
+        country: user.country,
+        state: user.state,
+        phonenumber: user.phonenumber,
       });
     } catch (error) {
       console.log("Error in getting user", error.message);
