@@ -12,6 +12,9 @@ export const getAllOrders = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
     if (!orders) {
       return res.status(404).json({
