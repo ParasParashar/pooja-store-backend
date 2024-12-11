@@ -17,6 +17,7 @@ export const getProductDetails = async (req, res) => {
         category: true,
         createdAt: true,
         updatedAt: true,
+        discountPrice: true,
       },
     });
 
@@ -54,6 +55,7 @@ export const getProducts = async (req, res) => {
         category: true,
         slug: true,
         imageUrl: true,
+        discountPrice: true,
       },
     });
 

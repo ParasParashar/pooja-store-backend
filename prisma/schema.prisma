@@ -73,7 +73,7 @@ model OrderItem {
 
 model ShippingAddress {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId     String   @db.ObjectId
+  // orderId     String   @db.ObjectId
   street      String
   city        String
   state       String
@@ -82,6 +82,7 @@ model ShippingAddress {
   phonenumber String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  // Order       Order[]
   Order       Order[]
 }
 

@@ -52,6 +52,7 @@ export const upsertUserAddress = async (req, res) => {
   }
 };
 
+// get user data of order and profile
 export const getUserData = async (req, res) => {
   try {
     const { id } = req.params;
@@ -60,7 +61,10 @@ export const getUserData = async (req, res) => {
       where: { id },
       include: {
         Orders: {
-          orderBy: "desc",
+          orderBy: {
+            // createdAt: "desc",
+            updatedAt: "desc",
+          },
           include: {
             orderItems: true,
           },

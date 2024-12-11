@@ -4,8 +4,13 @@ export const getAllOrders = async (req, res) => {
     const orders = await prisma.order.findMany({
       where: {},
       include: {
+        user: true,
         shippingAddress: true,
-        orderItems: true,
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
       },
     });
     if (!orders) {
@@ -26,6 +31,7 @@ export const getAllOrders = async (req, res) => {
       .json({ success: false, message: "Error getting Orders" });
   }
 };
+
 export const updateOrderDeliveryStatus = async (req, res) => {
   try {
     const { id } = req.params;

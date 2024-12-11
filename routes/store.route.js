@@ -9,7 +9,10 @@ import {
   getCartData,
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middlewares/authenticated.js";
-import { createOrder } from "../controllers/payment.controller.js";
+import {
+  createOrder,
+  verifyPayment,
+} from "../controllers/payment.controller.js";
 
 const router = Router();
 
@@ -20,10 +23,11 @@ router.get("/products/:id", getProductDetails);
 router.post("/products/cart", getCartData);
 
 // update the user address or create it
-router.get("/user/:id", getUserData);
-router.put("/user/address/:id", upsertUserAddress);
+router.get("/user/:id", isAuthenticated, getUserData);
+router.put("/user/address/:id", isAuthenticated, upsertUserAddress);
 
 // order routes with authenticated users
 router.post("/order/payment", isAuthenticated, createOrder);
+router.post("/order/payment/verify", isAuthenticated, verifyPayment);
 
 export default router;
