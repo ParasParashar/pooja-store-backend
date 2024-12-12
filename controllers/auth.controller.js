@@ -31,7 +31,10 @@ export const getSellerDetails = async (req, res) => {
 
 export const logout = (req, res) => {
   req.logout((err) => {
-    if (err) return res.status(500).json({ message: "Logout failed" });
-    res.redirect("/");
+    if (err)
+      return res.status(500).json({ message: "Logout failed", success: false });
+    return res
+      .status(200)
+      .json({ message: "Logout Successfully", success: true });
   });
 };
