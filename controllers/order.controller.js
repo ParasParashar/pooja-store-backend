@@ -1,6 +1,21 @@
 import prisma from "../prisma/prisma.js";
 export const getAllOrders = async (req, res) => {
   try {
+    // Extract page and size from query parameters
+    const { page = 1, size = 10 } = req.query;
+
+    // Parse and ensure the page and size are integers
+    const currentPage = parseInt(page, 10);
+    const pageSize = parseInt(size, 10);
+
+    // Calculate skip and take values for pagination
+    const skip = (currentPage - 1) * pageSize;
+    const take = pageSize;
+
+    // Fetch total count of orders for pagination metadata
+    const totalOrders = await prisma.order.count();
+
+    // Fetch paginated orders
     const orders = await prisma.order.findMany({
       where: {},
       include: {
@@ -15,20 +30,30 @@ export const getAllOrders = async (req, res) => {
       orderBy: {
         updatedAt: "desc",
       },
+      skip,
+      take,
     });
-    if (!orders) {
+
+    if (!orders || orders.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Currently you don't have any orders available",
+        message: "No orders available for the requested page.",
       });
     }
+
     return res.status(200).json({
       success: true,
       message: "Orders found successfully",
       data: orders,
+      pagination: {
+        currentPage,
+        pageSize,
+        totalOrders,
+        totalPages: Math.ceil(totalOrders / pageSize),
+      },
     });
   } catch (error) {
-    console.log("Error getting Orders: ", error);
+    console.error("Error getting Orders: ", error);
     return res
       .status(500)
       .json({ success: false, message: "Error getting Orders" });
