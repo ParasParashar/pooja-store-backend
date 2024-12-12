@@ -12,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { isSeller, isAuthenticated } from "./middlewares/authenticated.js";
+import { razorpayWebhookHandler } from "./controllers/payment.controller.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -66,6 +67,7 @@ app.use("/api/admin", isAuthenticated, adminRoutes);
 app.use("/api/image", isAuthenticated, imagesRoutes);
 // store routes
 app.use("/api/store", storeRoutes);
+app.post("/razorpay-webhook", razorpayWebhookHandler);
 
 app.listen(PORT, () => {
   console.log("Backend is running on port " + PORT);

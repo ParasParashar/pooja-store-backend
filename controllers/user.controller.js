@@ -62,11 +62,14 @@ export const getUserData = async (req, res) => {
       include: {
         Orders: {
           orderBy: {
-            // createdAt: "desc",
-            updatedAt: "desc",
+            createdAt: "desc",
           },
           include: {
-            orderItems: true,
+            orderItems: {
+              include: {
+                product: true,
+              },
+            },
           },
         },
       },
@@ -78,10 +81,11 @@ export const getUserData = async (req, res) => {
         message: "User not found.",
       });
     }
+
     return res.status(200).json({
       success: true,
       message: "User data fetch successfully.",
-      data: user,
+      data: user.Orders,
     });
   } catch (error) {
     console.error("Error updating user address:", error);

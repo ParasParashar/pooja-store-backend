@@ -89,6 +89,7 @@ export const createOrder = async (req, res) => {
             postalCode: user.postalCode,
             country: user.country,
             phonenumber: user.phonenumber,
+            email: user.email,
           },
         },
       },
@@ -111,8 +112,6 @@ export const createOrder = async (req, res) => {
     );
 
     // Return success response with order details
-
-    console.log("order created successfully", createdOrder);
     return res.status(201).json({
       success: true,
       message: "Order created successfully!",
@@ -134,12 +133,12 @@ export const verifyPayment = async (req, res) => {
     razorpay_signature,
     orderId,
   } = req.body;
-  console.log(req.body, "response of razorpay");
 
   const sha = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
   sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
   const digest = sha.digest("hex");
   let order;
+
   if (digest !== razorpay_signature) {
     order = await prisma.order.update({
       where: { id: orderId },
@@ -169,56 +168,94 @@ export const verifyPayment = async (req, res) => {
   });
 };
 
-// export const verifyPayment = async (req, res) => {
-//   try {
-//     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+// delete the online order if payment fails
+export const deleteOrder = async (req, res) => {
+  try {
+    const { id: orderId } = req.params;
+    console.log("response of  failed order razorpay");
+    await prisma.order.delete({
+      where: { id: orderId, paymentMethod: "ONLINE" },
+    });
 
-//     // Verify the webhook signature
-//     const signature = req.headers["x-razorpay-signature"];
-//     const body = JSON.stringify(req.body);
+    res.status(200).json({
+      message: "Payment Successful",
+      success: true,
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error while deleting order",
+      success: false,
+    });
+  }
+};
 
-//     const expectedSignature = crypto
-//       .createHmac("sha256", secret)
-//       .update(body)
-//       .digest("hex");
+// web hook
 
-//     if (signature !== expectedSignature) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Invalid webhook signature" });
-//     }
-//     const { event, payload } = req.body;
-//     if (event === "payment.captured") {
-//       const paymentId = payload.payment.entity.id;
-//       const orderId = payload.payment.entity.order_id;
+export const razorpayWebhookHandler = async (req, res) => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-//       // Update the order status in your database
-//       await prisma.order.update({
-//         where: { razorpayOrderId: orderId },
-//         data: {
-//           status: "COMPLETED", // Directly mark as completed after payment capture
-//           razorpayPaymentId: paymentId,
-//         },
-//       });
-//     } else if (event === "payment.failed") {
-//       const orderId = payload.payment.entity.order_id;
+  // Verify the webhook signature
+  const signature = req.headers["x-razorpay-signature"];
+  const body = JSON.stringify(req.body);
 
-//       // handle update failurr
-//       await prisma.order.updateMany({
-//         where: { razorpayOrderId: orderId },
-//         data: {
-//           status: "CANCELLED",
-//         },
-//       });
-//     }
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(body)
+    .digest("hex");
 
-//     res
-//       .status(200)
-//       .json({ success: true, message: "Webhook processed successfully" });
-//   } catch (error) {
-//     console.log("Error in verifyPayment", error.message);
-//     return res
-//       .status(500)
-//       .json({ success: false, message: "Failed to verify" });
-//   }
-// };
+  if (signature !== expectedSignature) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid signature" });
+  }
+
+  const event = req.body.event;
+  const payload = req.body.payload;
+
+  try {
+    switch (event) {
+      case "payment.captured":
+        await prisma.order.update({
+          where: { razorpayOrderId: payload.payment.entity.order_id },
+          data: { status: "completed" },
+        });
+        console.log("Payment captured and order marked as completed.");
+        break;
+
+      case "payment.failed":
+        await prisma.order.update({
+          where: { razorpayOrderId: payload.payment.entity.order_id },
+          data: { status: "failed" },
+        });
+        console.log("Payment failed and order marked as failed.");
+        break;
+
+      case "order.paid":
+        await prisma.order.update({
+          where: { razorpayOrderId: payload.order.entity.id },
+          data: { status: "completed" },
+        });
+        console.log("Order paid and marked as completed.");
+        break;
+
+      case "order.cancelled":
+        await prisma.order.delete({
+          where: { razorpayOrderId: payload.order.entity.id },
+        });
+        console.log("Order cancelled and deleted.");
+        break;
+
+      default:
+        console.log(`Unhandled event: ${event}`);
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error handling Razorpay webhook:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Webhook handling failed" });
+  }
+};
