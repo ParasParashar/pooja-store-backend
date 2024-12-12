@@ -24,6 +24,6 @@ router.delete("/product/delete/:id", deleteProductPermanently);
 
 // orders routes
 router.get("/orders", getAllOrders);
-router.get("/order/update/:id", updateOrderDeliveryStatus);
+router.put("/order/update/:id", updateOrderDeliveryStatus);
 
 export default router;

@@ -64,23 +64,30 @@ export const updateOrderDeliveryStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+
     const order = await prisma.order.findUnique({
       where: {
         id: id,
       },
       include: {
-        orderItems: true,
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
       },
     });
+
     if (!order) {
       return res.status(404).json({
         success: false,
         message: "Order not found",
       });
     }
+
     const updatedOrder = await prisma.order.update({
       where: {
-        id: order.id,
+        id: id,
       },
       data: {
         deliveryStatus: status,
@@ -88,18 +95,39 @@ export const updateOrderDeliveryStatus = async (req, res) => {
     });
 
     if (status === "DELIVERED") {
-      // TODO UPDATE PRODUCT STOCK STATE
+      for (const orderItem of order.orderItems) {
+        const { product, quantity } = orderItem;
+        await prisma.product.update({
+          where: {
+            id: product.id,
+          },
+          data: {
+            stock: {
+              decrement: quantity,
+            },
+          },
+        });
+      }
+      await prisma.order.update({
+        where: {
+          id: id,
+        },
+        data: {
+          status: "COMPLETED",
+          paymentMethod: "COD",
+        },
+      });
     }
     return res.status(200).json({
       success: true,
-      message: "Orders updated successfully",
+      message: "Order updated successfully",
       data: updatedOrder,
     });
   } catch (error) {
-    console.log("rror updating Deliver status of  Orders ", error);
+    console.log("Error updating delivery status of orders: ", error);
     return res.status(500).json({
       success: false,
-      message: "Error updating Deliver status of  Orders",
+      message: "Error updating delivery status of orders",
     });
   }
 };
