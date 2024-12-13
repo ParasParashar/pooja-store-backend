@@ -31,6 +31,6 @@ router.put("/user/address/:id", isAuthenticated, upsertUserAddress);
 router.post("/order/payment", isAuthenticated, createOrder);
 router.post("/order/payment/verify", isAuthenticated, verifyPayment);
 // ==============delete the order if payment fails
-router.post("/order/payment/delete/:id", isAuthenticated, deleteOrder);
+router.delete("/order/payment/delete/:id", isAuthenticated, deleteOrder);
 
 export default router;

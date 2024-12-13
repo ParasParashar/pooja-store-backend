@@ -69,7 +69,7 @@ app.use("/api/image", isAuthenticated, isSeller, imagesRoutes);
 app.use("/api/store", storeRoutes);
 
 // webook  routes for the razorpay
-app.post("/razorpay-webhook", razorpayWebhookHandler);
+app.post("/verification", razorpayWebhookHandler);
 
 app.listen(PORT, () => {
   console.log("Backend is running on port " + PORT);

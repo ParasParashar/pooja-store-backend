@@ -1,3 +1,4 @@
+import { join } from "path";
 import { createRazorpayInstance } from "../config/razorpay.config.js";
 import prisma from "../prisma/prisma.js";
 import crypto from "crypto";
@@ -172,18 +173,27 @@ export const verifyPayment = async (req, res) => {
 export const deleteOrder = async (req, res) => {
   try {
     const { id: orderId } = req.params;
-    console.log("response of  failed order razorpay");
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order || order.paymentMethod !== "ONLINE") {
+      return res.status(404).json({
+        message: "Order not found or invalid order type",
+        success: false,
+      });
+    }
+
     await prisma.order.delete({
-      where: { id: orderId, paymentMethod: "ONLINE" },
+      where: { id: orderId },
     });
 
     res.status(200).json({
-      message: "Payment Successful",
+      message: "Order cancelled successfully!!",
       success: true,
-      orderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
     });
   } catch (error) {
+    console.error("Error while deleting order:", error);
     res.status(500).json({
       message: "Error while deleting order",
       success: false,
@@ -191,8 +201,8 @@ export const deleteOrder = async (req, res) => {
   }
 };
 
+// ----------------work in optional
 // web hook
-
 export const razorpayWebhookHandler = async (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
@@ -213,46 +223,77 @@ export const razorpayWebhookHandler = async (req, res) => {
 
   const event = req.body.event;
   const payload = req.body.payload;
-
-  console.log(event, "event of the razorpay event");
   try {
+    let order;
+
+    // Handle payment events
     switch (event) {
       case "payment.captured":
-        await prisma.order.update({
-          where: { razorpayOrderId: payload.payment.entity.order_id },
-          data: { status: "COMPLETED" },
-        });
-        console.log("Payment captured and order marked as completed.");
+        if (payload.payment.entity.id) {
+          order = await prisma.order.findFirst({
+            where: {
+              razorpayOrderId: payload.payment.order_id,
+              paymentMethod: "ONLINE",
+            },
+          });
+
+          if (order) {
+            await prisma.order.update({
+              where: { id: order.id },
+              data: {
+                status: "COMPLETED",
+                razorpayPaymentId: payload.payment.entity.id,
+              },
+            });
+          }
+        }
+        break;
+      case "order.paid":
+        if (payload.payment.entity.id) {
+          order = await prisma.order.findFirst({
+            where: {
+              razorpayOrderId: payload.payment.entity.order_id,
+              paymentMethod: "ONLINE",
+            },
+          });
+
+          if (order) {
+            await prisma.order.update({
+              where: { id: order.id },
+              data: {
+                status: "COMPLETED",
+                razorpayPaymentId: payload.payment.entity.id,
+              },
+            });
+          }
+          console.log(
+            "Payment completed and order marked with status as completed."
+          );
+        }
         break;
 
       case "payment.failed":
-        await prisma.order.update({
-          where: { razorpayOrderId: payload.payment.entity.order_id },
-          data: { status: "CANCELLED" },
-        });
-        console.log("Payment failed and order marked as failed.");
-        break;
-
-      case "order.paid":
-        await prisma.order.update({
-          where: { razorpayOrderId: payload.order.entity.id },
-          data: { status: "COMPLETED" },
-        });
-        console.log("Order paid and marked as completed.");
-        break;
-
-      case "order.cancelled":
-        await prisma.order.delete({
-          where: { razorpayOrderId: payload.order.entity.id },
-        });
-        console.log("Order cancelled and deleted.");
+        if (payload.payment.entity.order_id) {
+          order = await prisma.order.findFirst({
+            where: {
+              razorpayOrderId: payload.payment.entity.order_id,
+            },
+          });
+          if (order) {
+            await prisma.order.update({
+              where: { id: order.id },
+              data: { status: "CANCELLED" },
+            });
+            console.log("Payment failed and order marked as cancelled.");
+          }
+        }
         break;
 
       default:
         console.log(`Unhandled event: ${event}`);
     }
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, status: "ok" });
   } catch (error) {
     console.error("Error handling Razorpay webhook:", error);
     res
