@@ -214,12 +214,13 @@ export const razorpayWebhookHandler = async (req, res) => {
   const event = req.body.event;
   const payload = req.body.payload;
 
+  console.log(event, "event of the razorpay event");
   try {
     switch (event) {
       case "payment.captured":
         await prisma.order.update({
           where: { razorpayOrderId: payload.payment.entity.order_id },
-          data: { status: "completed" },
+          data: { status: "COMPLETED" },
         });
         console.log("Payment captured and order marked as completed.");
         break;
@@ -227,7 +228,7 @@ export const razorpayWebhookHandler = async (req, res) => {
       case "payment.failed":
         await prisma.order.update({
           where: { razorpayOrderId: payload.payment.entity.order_id },
-          data: { status: "failed" },
+          data: { status: "CANCELLED" },
         });
         console.log("Payment failed and order marked as failed.");
         break;
@@ -235,7 +236,7 @@ export const razorpayWebhookHandler = async (req, res) => {
       case "order.paid":
         await prisma.order.update({
           where: { razorpayOrderId: payload.order.entity.id },
-          data: { status: "completed" },
+          data: { status: "COMPLETED" },
         });
         console.log("Order paid and marked as completed.");
         break;

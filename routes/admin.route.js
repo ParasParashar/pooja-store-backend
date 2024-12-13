@@ -11,8 +11,12 @@ import {
   getAllOrders,
   updateOrderDeliveryStatus,
 } from "../controllers/order.controller.js";
+import { getDashboardData } from "../controllers/dashboard.controller.js";
 
 const router = Router();
+
+// dashboard routes
+router.get("/dashboard", getDashboardData);
 
 // product routes
 router.get("/products", getAllProducts);

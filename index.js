@@ -63,10 +63,12 @@ app.get("/", (req, res) => {
 // auth routes
 app.use("/auth", authRoutes);
 // admin  routes
-app.use("/api/admin", isAuthenticated, adminRoutes);
-app.use("/api/image", isAuthenticated, imagesRoutes);
+app.use("/api/admin", isAuthenticated, isSeller, adminRoutes);
+app.use("/api/image", isAuthenticated, isSeller, imagesRoutes);
 // store routes
 app.use("/api/store", storeRoutes);
+
+// webook  routes for the razorpay
 app.post("/razorpay-webhook", razorpayWebhookHandler);
 
 app.listen(PORT, () => {
