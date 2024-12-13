@@ -59,6 +59,61 @@ export const getAllOrders = async (req, res) => {
       .json({ success: false, message: "Error getting Orders" });
   }
 };
+// get paritcular order
+export const getParticularOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await prisma.order.findUnique({
+      where: { id },
+      select: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        shippingAddress: true,
+        orderItems: {
+          select: {
+            product: {
+              select: {
+                name: true,
+                category: true,
+                imageUrl: true,
+              },
+            },
+            quantity: true,
+            price: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+        razorpayOrderId: true,
+        razorpayPaymentId: true,
+        status: true,
+        deliveryStatus: true,
+        paymentMethod: true,
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "No Order details available .",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order details found successfully",
+      data: order,
+    });
+  } catch (error) {
+    console.error("Error getting Order details: ", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Error getting Order details" });
+  }
+};
 
 export const updateOrderDeliveryStatus = async (req, res) => {
   try {

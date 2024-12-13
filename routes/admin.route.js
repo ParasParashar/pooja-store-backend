@@ -9,6 +9,7 @@ import {
 } from "../controllers/product.controller.js";
 import {
   getAllOrders,
+  getParticularOrder,
   updateOrderDeliveryStatus,
 } from "../controllers/order.controller.js";
 import { getDashboardData } from "../controllers/dashboard.controller.js";
@@ -28,6 +29,7 @@ router.delete("/product/delete/:id", deleteProductPermanently);
 
 // orders routes
 router.get("/orders", getAllOrders);
+router.get("/orders/:id", getParticularOrder);
 router.put("/order/update/:id", updateOrderDeliveryStatus);
 
 export default router;
