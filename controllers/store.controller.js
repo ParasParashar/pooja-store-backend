@@ -1,5 +1,5 @@
 import prisma from "../prisma/prisma.js";
-// display all products of the user
+// get specific product details
 export const getProductDetails = async (req, res) => {
   try {
     const { id: slug } = req.params;
@@ -41,7 +41,7 @@ export const getProductDetails = async (req, res) => {
   }
 };
 
-// get specific product details
+// display all products of the user
 export const getProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
@@ -56,6 +56,7 @@ export const getProducts = async (req, res) => {
         slug: true,
         imageUrl: true,
         discountPrice: true,
+        description: true,
       },
     });
 
