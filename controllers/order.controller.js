@@ -18,17 +18,24 @@ export const getAllOrders = async (req, res) => {
     // Fetch paginated orders
     const orders = await prisma.order.findMany({
       where: {},
-      include: {
-        user: true,
-        shippingAddress: true,
-        orderItems: {
-          include: {
-            product: true,
+      select: {
+        user: {
+          select: {
+            name: true,
           },
         },
+        createdAt: true,
+        updatedAt: true,
+        razorpayOrderId: true,
+        razorpayPaymentId: true,
+        status: true,
+        deliveryStatus: true,
+        paymentMethod: true,
+        totalAmount: true,
+        id: true,
       },
       orderBy: {
-        updatedAt: "desc",
+        createdAt: "desc",
       },
       skip,
       take,
@@ -59,6 +66,7 @@ export const getAllOrders = async (req, res) => {
       .json({ success: false, message: "Error getting Orders" });
   }
 };
+
 // get paritcular order
 export const getParticularOrder = async (req, res) => {
   try {
@@ -92,6 +100,8 @@ export const getParticularOrder = async (req, res) => {
         status: true,
         deliveryStatus: true,
         paymentMethod: true,
+        totalAmount: true,
+        id: true,
       },
     });
 
