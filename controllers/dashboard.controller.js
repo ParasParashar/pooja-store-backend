@@ -67,6 +67,7 @@ export const getDashboardData = async (req, res) => {
         status: true,
         deliveryStatus: true,
         createdAt: true,
+        totalAmount: true,
         orderItems: {
           select: {
             quantity: true,
