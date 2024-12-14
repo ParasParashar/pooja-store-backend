@@ -1,6 +1,7 @@
 import express from "express";
 import session from "express-session";
 import dotenv from "dotenv";
+import cookieparser from "cookie-parser";
 import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import imagesRoutes from "./routes/imageRoutes.js";
@@ -22,14 +23,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true }));
+const allowedOrigins = ["http://localhost:3000", process.env.FRONTEND_URL];
+app.use(cookieparser());
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
 // Session Middleware
 app.use(
   session({
@@ -40,10 +44,10 @@ app.use(
       mongoUrl: process.env.DATABASE_URL,
     }),
     cookie: {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 48,
+      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      httpOnly: true, // Ensure this is set
+      secure: process.env.NODE_ENV === "production", // Only true in production
       sameSite: "None",
-      secure: process.env.NODE_ENV === "production",
     },
   })
 );
