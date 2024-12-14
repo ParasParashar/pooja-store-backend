@@ -40,7 +40,10 @@ app.use(
       mongoUrl: process.env.DATABASE_URL,
     }),
     cookie: {
+      httpOnly: true,
       maxAge: 1000 * 60 * 60 * 48,
+      sameSite: "None",
+      secure: process.env.NODE_ENV === "production",
     },
   })
 );
