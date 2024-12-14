@@ -53,11 +53,11 @@ app.use(passport.session());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("/", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.send("<a href='/auth/logout'>Logout</a>" + req.user.name);
-  } else {
-    res.send("<a href='/auth/google'>Login with google</a> <br>");
-  }
+  // if (req.isAuthenticated()) {
+  //   res.send("<a href='/auth/logout'>Logout</a>" + req.user.name);
+  // } else {
+  res.send("<a href='/auth/google/callback'>Login with google</a> <br>");
+  // }
 });
 
 // auth routes
