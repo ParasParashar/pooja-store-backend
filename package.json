@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "build": "npm install && npx prisma generate prisma/schema.prisma",
+    "build": "npm install && npx prisma generate",
     "start": "node index.js"
   },
   "type": "module",
