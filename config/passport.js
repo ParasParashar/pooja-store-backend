@@ -9,14 +9,14 @@ const ADMIN_EMAILS = process.env.ADMIN_EMAILS
   ? process.env.ADMIN_EMAILS.split(",")
   : [];
 
+// Configure Google OAuth Strategy
 passport.use(
   new GoogleStrategy.Strategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      // callbackURL: "/auth/google/callback",
       callbackURL:
-        "https://pooja-store-backend-0cn7.onrender.com/auth/google/callback",
+        "https://pooja-store-backend-0cn7.onrender.com/auth/google/callback", // Deployed URL
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -46,6 +46,7 @@ passport.use(
   )
 );
 
+// Serialize and Deserialize User
 passport.serializeUser((user, done) => done(null, user.id));
 
 passport.deserializeUser(async (id, done) => {
@@ -57,4 +58,5 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+// Export passport
 export default passport;
