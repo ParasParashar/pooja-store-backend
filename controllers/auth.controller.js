@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 export const getSellerDetails = async (req, res) => {
   try {
     const token = req.cookies.jwt;
+    console.log(token, "value of the token");
     if (!token) {
       return res
         .status(401)
