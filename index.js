@@ -23,15 +23,34 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const allowedOrigins = ["http://localhost:3000", process.env.FRONTEND_URL];
 app.use(cookieparser());
+// const allowedOrigins = ["http://localhost:3000", process.env.FRONTEND_URL];
+
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//     credentials: true,
+//   })
+// );
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Allow credentials
   })
 );
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "50mb" }));
 // Session Middleware
