@@ -19,6 +19,7 @@ export const getAllOrders = async (req, res) => {
     const orders = await prisma.order.findMany({
       where: {},
       select: {
+        id: true,
         user: {
           select: {
             name: true,
@@ -32,7 +33,6 @@ export const getAllOrders = async (req, res) => {
         deliveryStatus: true,
         paymentMethod: true,
         totalAmount: true,
-        id: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -41,10 +41,16 @@ export const getAllOrders = async (req, res) => {
       take,
     });
 
+    // Normalize data to handle cases where user is null
+    const normalizedOrders = orders.map((order) => ({
+      ...order,
+      user: order.user || { name: "Unknown User" }, // Default value for missing users
+    }));
+
     return res.status(200).json({
       success: true,
       message: "Orders found successfully",
-      data: orders,
+      data: normalizedOrders,
       pagination: {
         currentPage,
         pageSize,
