@@ -1,18 +1,8 @@
 import prisma from "../prisma/prisma.js";
-import jwt from "jsonwebtoken";
 
 export const getSellerDetails = async (req, res) => {
   try {
-    const token = req.cookies.jwt;
-    console.log(token, "value of the token");
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Authenticated token not found" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    console.log("data of the user details", req.user);
     const userId = req.user.id;
     const user = await prisma.user.findUnique({ where: { id: userId } });
 

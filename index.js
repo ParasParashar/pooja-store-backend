@@ -107,6 +107,7 @@ import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import imagesRoutes from "./routes/imageRoutes.js";
 import storeRoutes from "./routes/store.route.js";
+import userRoutes from "./routes/user.route.js";
 import passport from "./config/passport.js";
 import cors from "cors";
 import path from "path";
@@ -157,6 +158,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/auth/user", authenticateJWT, userRoutes);
 app.use("/api/admin", authenticateJWT, isSeller, adminRoutes);
 app.use("/api/image", authenticateJWT, isSeller, imagesRoutes);
 app.use("/api/store", storeRoutes);
