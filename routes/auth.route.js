@@ -46,8 +46,10 @@ router.get(
     const token = req.user.token;
     console.log("token value of the  user: " + token);
     res.cookie("jwt", token, {
+      maxAge: 15 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "None",
     });
 
     res.redirect(process.env.FRONTEND_URL);
