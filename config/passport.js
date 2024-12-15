@@ -81,7 +81,7 @@ const ADMIN_EMAILS = process.env.ADMIN_EMAILS
 
 const callbackURL =
   process.env.NODE_ENV === "production"
-    ? "https://pooja-store-backend-0cn7.onrender.com/auth/google/callback"
+    ? "https://pooja-store-backend-rn7l.onrender.com/auth/google/callback"
     : "http://localhost:4000/auth/google/callback";
 
 console.log(callbackURL, "current server rul");
