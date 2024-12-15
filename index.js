@@ -43,12 +43,12 @@ app.use(
     store: MongoStore.create({
       mongoUrl: process.env.DATABASE_URL,
     }),
-    // cookie: {
-    //   maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
-    //   httpOnly: true, // Ensure this is set
-    //   secure: process.env.NODE_ENV === "production", // Only true in production
-    //   sameSite: "None",
-    // },
+    cookie: {
+      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      // httpOnly: true, // Ensure this is set
+      // secure: process.env.NODE_ENV === "production", // Only true in production
+      // sameSite: "None",
+    },
   })
 );
 
