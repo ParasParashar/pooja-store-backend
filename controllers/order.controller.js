@@ -41,13 +41,6 @@ export const getAllOrders = async (req, res) => {
       take,
     });
 
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No orders available for the requested page.",
-      });
-    }
-
     return res.status(200).json({
       success: true,
       message: "Orders found successfully",
@@ -176,10 +169,10 @@ export const updateOrderDeliveryStatus = async (req, res) => {
       await prisma.order.update({
         where: {
           id: id,
+          paymentMethod: "COD",
         },
         data: {
           status: "COMPLETED",
-          paymentMethod: "COD",
         },
       });
     }

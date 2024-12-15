@@ -8,7 +8,7 @@ import {
   getUserData,
   getCartData,
 } from "../controllers/user.controller.js";
-import { isAuthenticated } from "../middlewares/authenticated.js";
+import { authenticateJWT } from "../middlewares/authenticated.js";
 import {
   createOrder,
   verifyPayment,
@@ -23,14 +23,23 @@ router.get("/products/:id", getProductDetails);
 // cart
 router.post("/products/cart", getCartData);
 
+// // update the user address or create it
+// router.get("/user/:id", isAuthenticated, getUserData);
+// router.put("/user/address/:id", isAuthenticated, upsertUserAddress);
+
+// // order routes with authenticated users
+// router.post("/order/payment", isAuthenticated, createOrder);
+// router.post("/order/payment/verify", isAuthenticated, verifyPayment);
+// // ==============delete the order if payment fails
+// router.delete("/order/payment/delete/:id", isAuthenticated, deleteOrder);
 // update the user address or create it
-router.get("/user/:id", isAuthenticated, getUserData);
-router.put("/user/address/:id", isAuthenticated, upsertUserAddress);
+router.get("/user/:id", authenticateJWT, getUserData);
+router.put("/user/address/:id", authenticateJWT, upsertUserAddress);
 
 // order routes with authenticated users
-router.post("/order/payment", isAuthenticated, createOrder);
-router.post("/order/payment/verify", isAuthenticated, verifyPayment);
+router.post("/order/payment", authenticateJWT, createOrder);
+router.post("/order/payment/verify", authenticateJWT, verifyPayment);
 // ==============delete the order if payment fails
-router.delete("/order/payment/delete/:id", isAuthenticated, deleteOrder);
+router.delete("/order/payment/delete/:id", authenticateJWT, deleteOrder);
 
 export default router;

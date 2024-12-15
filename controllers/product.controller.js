@@ -78,6 +78,9 @@ export const getAllProducts = async (req, res) => {
         imageUrl: true,
         description: true,
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
     if (products.length === 0) {
       return res.status(404).json({
