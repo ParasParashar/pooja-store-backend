@@ -44,7 +44,7 @@ app.use(
       mongoUrl: process.env.DATABASE_URL,
     }),
     cookie: {
-      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      maxAge: 15 * 24 * 60 * 60 * 1000,
       // httpOnly: true, // Ensure this is set
       // secure: process.env.NODE_ENV === "production", // Only true in production
       // sameSite: "None",

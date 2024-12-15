@@ -1,7 +1,7 @@
 import prisma from "../prisma/prisma.js";
 
 export const getSellerDetails = async (req, res) => {
-  console.log(req.isAuthenticated(), "dafaldjflsjdf");
+  console.log(req.isAuthenticated(), "currently again this is come false");
   if (req.isAuthenticated()) {
     try {
       const userId = req.user.id;
