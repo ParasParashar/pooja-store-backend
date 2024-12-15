@@ -84,7 +84,6 @@ const callbackURL =
     ? "https://pooja-store-backend-rn7l.onrender.com/auth/google/callback"
     : "http://localhost:4000/auth/google/callback";
 
-console.log(callbackURL, "current server rul");
 passport.use(
   new GoogleStrategy.Strategy(
     {
