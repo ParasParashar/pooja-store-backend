@@ -1,11 +1,11 @@
 import prisma from "../prisma/prisma.js";
 
 export const getSellerDetails = async (req, res) => {
+  console.log(req.isAuthenticated(), "dafaldjflsjdf");
   if (req.isAuthenticated()) {
     try {
       const userId = req.user.id;
       const user = await prisma.user.findUnique({ where: { id: userId } });
-      console.log("why user is not found", user, userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }

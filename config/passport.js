@@ -9,13 +9,17 @@ const ADMIN_EMAILS = process.env.ADMIN_EMAILS
   ? process.env.ADMIN_EMAILS.split(",")
   : [];
 
+const callbackURL =
+  process.env.NODE_ENV === "production"
+    ? "https://pooja-store-backend-0cn7.onrender.com/auth/google/callback"
+    : "http://localhost:4000/auth/google/callback";
+console.log(callbackURL, "current callback url ");
 passport.use(
   new GoogleStrategy.Strategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL:
-        "https://pooja-store-backend-0cn7.onrender.com/auth/google/callback",
+      callbackURL: callbackURL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
