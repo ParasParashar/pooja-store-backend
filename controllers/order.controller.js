@@ -113,7 +113,7 @@ export const getParticularOrder = async (req, res) => {
 export const updateOrderDeliveryStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, paymentMethod } = req.body;
 
     const order = await prisma.order.findUnique({
       where: {
@@ -158,15 +158,18 @@ export const updateOrderDeliveryStatus = async (req, res) => {
           },
         });
       }
-      await prisma.order.update({
-        where: {
-          id: id,
-          paymentMethod: "COD",
-        },
-        data: {
-          status: "COMPLETED",
-        },
-      });
+      // update the payment method of the cash on delivery product to completed
+      if (paymentMethod === "COD") {
+        await prisma.order.update({
+          where: {
+            id: id,
+            paymentMethod: "COD",
+          },
+          data: {
+            status: "COMPLETED",
+          },
+        });
+      }
     }
     return res.status(200).json({
       success: true,
