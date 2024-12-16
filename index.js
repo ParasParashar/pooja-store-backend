@@ -23,6 +23,8 @@ const PORT = process.env.PORT || 4000;
 
 const allowedOrigins = ["http://localhost:3000", process.env.FRONTEND_URL];
 
+console.log(allowedOrigins);
+
 app.use(cookieparser());
 app.use(
   cors({

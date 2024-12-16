@@ -81,9 +81,9 @@ const ADMIN_EMAILS = process.env.ADMIN_EMAILS
 
 const callbackURL =
   process.env.NODE_ENV === "production"
-    ? "https://pooja-store-backend-rn7l.onrender.com/auth/google/callback"
+    ? `${process.env.BACKEND_URL}/auth/google/callback`
     : "http://localhost:4000/auth/google/callback";
-
+console.log(callbackURL, "Login url");
 passport.use(
   new GoogleStrategy.Strategy(
     {
