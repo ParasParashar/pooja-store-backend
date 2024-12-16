@@ -55,8 +55,8 @@ export const getDashboardData = async (req, res) => {
     // Last 3 days pending orders or those not completed
     const pendingOrders = await prisma.order.findMany({
       where: {
-        status: {
-          not: "COMPLETED",
+        deliveryStatus: {
+          not: "DELIVERED",
         },
         createdAt: {
           gte: new Date(new Date() - 3 * 24 * 60 * 60 * 1000),
