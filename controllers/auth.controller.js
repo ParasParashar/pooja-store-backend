@@ -30,14 +30,30 @@ export const getSellerDetails = async (req, res) => {
 
 export const logout = (req, res) => {
   try {
-    res.cookie("jwt", "", { maxAge: 0 });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    });
+
+    if (req.logout) {
+      req.logout((err) => {
+        if (err) {
+          console.error("Error in req.logout:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Logout failed" });
+        }
+      });
+    }
+
     return res
       .status(200)
-      .json({ success: true, message: "Logout Successfully" });
+      .json({ success: true, message: "Logged out successfully" });
   } catch (error) {
-    console.log("Error in logout", error.message);
-    res
+    console.error("Error in logout:", error.message);
+    return res
       .status(500)
-      .json({ success: false, message: "Server Error " + error.message });
+      .json({ success: false, message: "Server Error: " + error.message });
   }
 };
